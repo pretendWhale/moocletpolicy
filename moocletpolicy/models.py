@@ -10,6 +10,7 @@ class Mooclet(models.Model):
 class Version(models.Model):
 	# MOOClets
 	mooclet = models.ForeignKey(Mooclet)
+	name = models.CharField(max_length=100)
 
 
 # [0.2, 0.3, 0.5]
