@@ -43,7 +43,7 @@ def returnWeights(mooclet_id, var1, var2, var3):
 	subgroup_probability_array = SubGroupProbabilityArray.objects.get(mooclet=mooclet_id, subgroup=subgroup)
 
 	# for each probability in the probability partition
-	for version_probability in subgroup_probability_array.versionprobability_set:
+	for version_probability in subgroup_probability_array.versionprobability_set.all():
 		# create dict entry that looks like {version_id: probability value}, e.g. {3: 0.5}
 		policy[version_policy.version.name] = version_policy.probability
 
