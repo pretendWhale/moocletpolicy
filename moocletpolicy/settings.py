@@ -29,7 +29,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'moocletpolicy',
+
     #'moocletpolicy.MoocletpolicyConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # http://whitenoise.evans.io/en/stable/django.html#using-whitenoise-in-development
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'moocletpolicy'
 ]
 
 MIDDLEWARE_CLASSES = [
