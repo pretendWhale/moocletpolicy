@@ -16,13 +16,13 @@ def get_mooclet_version(request):
 	"""
 	#mooclet = Mooclet.objects.get(name=mooclet)
 	if 'mooclet' not in request.GET:
-        return HttpResponse('mooclet not found in GET parameters')
-    if 'var1' not in request.GET:
-        return HttpResponse('var1 not found in GET parameters')
-    if 'var2' not in request.GET:
-        return HttpResponse('var2 not found in GET parameters')
-    if 'var3' not in request.GET:
-        return HttpResponse('var3 not found in GET parameters')
+		return HttpResponse('mooclet not found in GET parameters')
+	if 'var1' not in request.GET:
+		return HttpResponse('var1 not found in GET parameters')
+	if 'var2' not in request.GET:
+		return HttpResponse('var2 not found in GET parameters')
+	if 'var3' not in request.GET:
+		return HttpResponse('var3 not found in GET parameters')
 
 	policy = returnWeights(request.GET['mooclet'], request.GET['var1'], request.GET['var2'], request.GET['var3'])
 	policy_array = []
