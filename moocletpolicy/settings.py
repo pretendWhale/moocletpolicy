@@ -29,7 +29,8 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'moocletpolicy.apps.MoocletpolicyConfig',
+    'moocletpolicy',
+    #'moocletpolicy.MoocletpolicyConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

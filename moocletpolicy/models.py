@@ -12,6 +12,13 @@ class Version(models.Model):
 	mooclet = models.ForeignKey(Mooclet)
 	name = models.CharField(max_length=100)
 
+class SubGroup(models.Model):
+	var1 = models.IntegerField()
+	var2 = models.IntegerField()
+	var3 = models.IntegerField()
+	var4 = models.IntegerField()
+	var5 = models.IntegerField()
+	var6 = models.IntegerField()
 
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
@@ -26,13 +33,7 @@ class VersionProbability(models.Model):
 	probability = models.FloatField()
 
 
-class SubGroup(models.Model):
-	var1 = model.integerField()
-	var2 = model.integerField()
-	var3 = model.integerField()
-	var4 = model.integerField()
-	var5 = model.integerField()
-	var6 = model.integerField()
+
 
 
 # class CustomVariable(models.Model):
