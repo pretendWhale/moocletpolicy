@@ -27,7 +27,14 @@ class SubGroup(models.Model):
 	var7 = models.IntegerField(null=True)
 
 	def __unicode__(self):
-		return str(self.id)
+		field_names = self._meta.get_all_field_names()
+		#this is bad, change this.
+		val_str = '%s:%s|%s:%s|%s:%s|%s:%s|%s:%s|%s:%s|%s:%s' % (field_names[0], 
+			self.var1,field_names[1], self.var2,field_names[2], self.var3,field_names[3], self.var4,field_names[4], self.var5,
+			field_names[5], self.var6,field_names[6], self.var7,)
+
+		return val_str
+		#return str(self.id)
 
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):

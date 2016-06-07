@@ -2,16 +2,26 @@ from django.contrib import admin
 from django.apps import apps
 from .models import *
 
+#inline version in admin - click the mooclet id!
+class VersionInline(admin.StackedInline):
+    model = Version
 
-# Admin classes deine model display in admin interface
+
+
+class VersionProbabilityInline(admin.StackedInline):
+    model = VersionProbability
+
+# Admin classes define model display in admin interface
 class MoocletAdmin (admin.ModelAdmin):
 	#what fields to display, in what order
 	list_display = ['id','name']
+	inlines = [VersionInline,]
 
 class VersionAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'name']
 	#what fields to allow filtering on
 	list_filter = ['mooclet',]
+	inlines = [VersionProbabilityInline,]
 
 
 class SubGroupAdmin (admin.ModelAdmin):
@@ -19,6 +29,7 @@ class SubGroupAdmin (admin.ModelAdmin):
 
 class SubGroupProbabilityArrayAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'subgroup']
+	inlines = [VersionProbabilityInline,]
 
 class VersionProbabilityAdmin (admin.ModelAdmin):
 	list_display = ['id', 'version', 'subgroup_probability_array', 'probability']
@@ -28,6 +39,8 @@ class VersionProbabilityAdmin (admin.ModelAdmin):
 
 	def get_mooclet(self, obj):
 		return obj.version.mooclet
+
+
 
 	
 
