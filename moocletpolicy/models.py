@@ -27,7 +27,7 @@ class SubGroup(models.Model):
 	var7 = models.IntegerField()
 
 	def __unicode__(self):
-		return self.id
+		return str(self.id)
 
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
@@ -35,7 +35,7 @@ class SubGroupProbabilityArray(models.Model):
 	subgroup = models.ForeignKey(SubGroup)
 
 	def __unicode__(self):
-		return self.id
+		return str(self.id)
 	
 
 # 0.2
@@ -45,7 +45,7 @@ class VersionProbability(models.Model):
 	probability = models.FloatField()
 
 	def __unicode__(self):
-		return self.id
+		return str(self.id)
 
 
 
