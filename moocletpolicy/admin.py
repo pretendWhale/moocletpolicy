@@ -18,7 +18,7 @@ class SubGroupAdmin (admin.ModelAdmin):
 class SubGroupProbabilityArrayAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'subgroup']
 
-class VersionProbabilityArrayAdmin (admin.ModelAdmin):
+class VersionProbabilityAdmin (admin.ModelAdmin):
 	list_display = ['id', 'version', 'subgroup_probability_array', 'probability']
 
 
@@ -26,4 +26,4 @@ admin.site.register(Mooclet, MoocletAdmin)
 admin.site.register(Version, VersionAdmin)
 admin.site.register(SubGroup, SubGroupAdmin)
 admin.site.register(SubGroupProbabilityArray, SubGroupProbabilityArrayAdmin)
-admin.site.register(VersionProbabilityArray, VersionProbabilityArrayAdmin)
+admin.site.register(VersionProbability, VersionProbabilityArrayAdmin)
