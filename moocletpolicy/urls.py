@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from moocletpolicy import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^getmoocletversion/', views.get_mooclet_version, name="get mooclet version"),
 ]

@@ -1,20 +1,22 @@
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.forms import formset_factory,inlineformset_factory, ModelForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import numpy as np
 
 from .models import *
 
 
-#get a mooclet version based on the 
-def get_mooclet_version(mooclet, user_id, var1, var2, var3):
+
+#get a mooclet version based on the mooclet & vars
+#resuest is a GET with mooclet id, user_id, var1, var2, var3
+def get_mooclet_version(request):
 	"""
 	
 	"""
 	#mooclet = Mooclet.objects.get(name=mooclet)
 
-	policy = returnWeights(mooclet, var1, var2, var3)
+	policy = returnWeights(request.GET('mooclet'), request.GET('var1'), request.GET('var2'), request.GET('var3'))
 	policy_array = []
 	version_names = []
 	for key in policy:
@@ -23,7 +25,7 @@ def get_mooclet_version(mooclet, user_id, var1, var2, var3):
 
 	mooclet_version = np.random.choice(version_names, p=policy_array)
 
-	return mooclet_version
+	return JsonResponse({'version': mooclet_version})
 
 def returnWeights(mooclet_id, var1, var2, var3):
 
