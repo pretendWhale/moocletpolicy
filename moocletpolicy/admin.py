@@ -23,8 +23,8 @@ class SubGroupProbabilityArrayAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'subgroup']
 
 class VersionProbabilityAdmin (admin.ModelAdmin):
-	list_display = ['id', 'version__mooclet__id', 'version__name', 'subgroup_probability_array___id', 'probability']
-	list_filter = ('version__mooclet__id', 'version__name', 'subgroup_probability_array___id')
+	list_display = ['id', 'version__mooclet__id', 'version__name', 'subgroup_probability_array__id', 'probability']
+	list_filter = ('version__mooclet__id', 'version__name', 'subgroup_probability_array__id')
 
 	def get_version_name(self,obj):
 		return obj.version.name
