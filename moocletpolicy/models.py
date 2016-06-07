@@ -4,6 +4,8 @@ from django.db import models
 class Mooclet(models.Model):
 	# id
 	name = models.CharField(max_length=100)
+	def __unicode__(self):
+        return self.name
 
 
 # Prompt version, e.g. "why did you take this course"
@@ -11,6 +13,9 @@ class Version(models.Model):
 	# MOOClets
 	mooclet = models.ForeignKey(Mooclet)
 	name = models.CharField(max_length=100)
+
+	def __unicode__(self):
+        return self.name
 
 class SubGroup(models.Model):
 	var1 = models.IntegerField()
@@ -21,10 +26,16 @@ class SubGroup(models.Model):
 	var6 = models.IntegerField()
 	var7 = models.IntegerField()
 
+	def __unicode__(self):
+        return self.id
+
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
 	mooclet = models.ForeignKey(Mooclet)
 	subgroup = models.ForeignKey(SubGroup)
+
+	def __unicode__(self):
+        return self.id
 	
 
 # 0.2
@@ -32,6 +43,9 @@ class VersionProbability(models.Model):
 	version = models.ForeignKey(Version)
 	subgroup_probability_array = models.ForeignKey(SubGroupProbabilityArray)
 	probability = models.FloatField()
+
+	def __unicode__(self):
+        return self.id
 
 
 
