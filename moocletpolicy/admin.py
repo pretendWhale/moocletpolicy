@@ -21,10 +21,10 @@ class SubGroupProbabilityArrayAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'subgroup']
 
 class VersionProbabilityAdmin (admin.ModelAdmin):
-	list_display = ['id', 'get_mooclet', 'version', 'subgroup_probability_array', 'probability']
+	list_display = ['id', 'version', 'subgroup_probability_array', 'probability']
 
 	#__ signifies looking up property of mooclet ForeignKey
-	list_filter = ('get_mooclet', 'version', 'subgroup_probability_array')
+	list_filter = ('version', 'subgroup_probability_array')
 
 	def get_mooclet(self, obj):
 		return obj.version.mooclet
