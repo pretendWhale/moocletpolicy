@@ -16,7 +16,7 @@ def get_mooclet_version(request):
 	"""
 	#mooclet = Mooclet.objects.get(name=mooclet)
 
-	policy = returnWeights(request.GET('mooclet'), request.GET('var1'), request.GET('var2'), request.GET('var3'))
+	policy = returnWeights(request.GET['mooclet'], request.GET['var1'], request.GET['var2'], request.GET['var3'])
 	policy_array = []
 	version_names = []
 	for key in policy:
