@@ -11,7 +11,7 @@ class MoocletAdmin (admin.ModelAdmin):
 class VersionAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'name']
 	#what fields to allow filtering on
-	list_filter = ('mooclet')
+	list_filter = ['mooclet',]
 
 
 class SubGroupAdmin (admin.ModelAdmin):
@@ -24,7 +24,7 @@ class VersionProbabilityAdmin (admin.ModelAdmin):
 	list_display = ['id', 'version', 'subgroup_probability_array', 'probability']
 
 	#__ signifies looking up property of mooclet ForeignKey
-	list_filter = ('version', 'subgroup_probability_array')
+	list_filter = ['version', 'subgroup_probability_array']
 
 	def get_mooclet(self, obj):
 		return obj.version.mooclet
