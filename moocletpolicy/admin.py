@@ -10,8 +10,8 @@ class MoocletAdmin (admin.ModelAdmin):
 	list_display = ['id','name']
 
 class VersionAdmin (admin.ModelAdmin):
-	list_display = ['id', 'get_mooclet_id', 'name']
-	list_filter = ('get_mooclet_id')
+	list_display = ['id', 'mooclet__id', 'name']
+	list_filter = ('mooclet__id')
 
 	def get_mooclet_id(self,obj):
 		return obj.mooclet.id
@@ -23,8 +23,8 @@ class SubGroupProbabilityArrayAdmin (admin.ModelAdmin):
 	list_display = ['id', 'mooclet', 'subgroup']
 
 class VersionProbabilityAdmin (admin.ModelAdmin):
-	list_display = ['id', 'get_mooclet_id', 'get_version_name', 'get_subgroup_probability_array_id', 'probability']
-	list_filter = ('get_mooclet_id', 'get_version_name', 'get_subgroup_probability_array_id')
+	list_display = ['id', 'version__mooclet__id', 'version__name', 'subgroup_probability___id', 'probability']
+	list_filter = ('version__mooclet__id', 'version__name', 'subgroup_probability___id')
 
 	def get_version_name(self,obj):
 		return obj.version.name
