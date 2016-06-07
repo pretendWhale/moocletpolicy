@@ -21,7 +21,7 @@ def get_mooclet_version(mooclet, user_id, var1, var2, var3):
 		version_names.append(key)
 		policy_array.append(policy[key])
 
-	np.random.choice(version_names, p=policy_array)
+	mooclet_version = np.random.choice(version_names, p=policy_array)
 
 	return mooclet_version
 

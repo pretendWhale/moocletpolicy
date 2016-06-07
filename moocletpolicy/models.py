@@ -19,6 +19,7 @@ class SubGroup(models.Model):
 	var4 = models.IntegerField()
 	var5 = models.IntegerField()
 	var6 = models.IntegerField()
+	var7 = models.IntegerField()
 
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
