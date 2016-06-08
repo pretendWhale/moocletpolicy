@@ -18,13 +18,13 @@ class Version(models.Model):
 		return self.name
 
 class SubGroup(models.Model):
-	var1 = models.IntegerField(null=True)
-	var2 = models.IntegerField(null=True)
-	var3 = models.IntegerField(null=True)
-	var4 = models.IntegerField(null=True)
-	var5 = models.IntegerField(null=True)
-	var6 = models.IntegerField(null=True)
-	var7 = models.IntegerField(null=True)
+	var1 = models.IntegerField(null=True, blank=True)
+	var2 = models.IntegerField(null=True, blank=True)
+	var3 = models.IntegerField(null=True, blank=True)
+	var4 = models.IntegerField(null=True, blank=True)
+	var5 = models.IntegerField(null=True, blank=True)
+	var6 = models.IntegerField(null=True, blank=True)
+	var7 = models.IntegerField(null=True, blank=True)
 
 	def __unicode__(self):
 		field_names = self._meta.get_all_field_names()
