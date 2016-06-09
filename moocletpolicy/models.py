@@ -17,6 +17,8 @@ class Version(models.Model):
 	def __unicode__(self):
 		return self.name
 
+# null=true allows null values 
+# blank allows leaving fields blank when adding them e.g. via admin interface
 class SubGroup(models.Model):
 	var1 = models.IntegerField(null=True, blank=True)
 	var2 = models.IntegerField(null=True, blank=True)

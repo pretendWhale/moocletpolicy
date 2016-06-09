@@ -9,12 +9,9 @@ from .models import *
 
 
 #get a mooclet version based on the mooclet & vars
-#resuest is a GET with mooclet id, user_id, var1, var2, var3
+#request is a GET with mooclet id, user_id, var1, var2, var3
 def get_mooclet_version(request):
-	"""
-	
-	"""
-	#mooclet = Mooclet.objects.get(name=mooclet)
+	#make sure essential vars are in request
 	if 'mooclet' not in request.GET:
 		return HttpResponse('mooclet not found in GET parameters')
 	if 'var1' not in request.GET:
@@ -24,27 +21,27 @@ def get_mooclet_version(request):
 	if 'var3' not in request.GET:
 		return HttpResponse('var3 not found in GET parameters')
 
-	policy = returnWeights(request.GET['mooclet'], request.GET['var1'], request.GET['var2'], request.GET['var3'])
-	policy_array = []
-	version_names = []
-	for key in policy:
-		version_names.append(key)
-		policy_array.append(policy[key])
-
-	mooclet_version = np.random.choice(version_names, p=policy_array)
+	#get the policy based on user vars
+	policy,version_names = returnWeights(request.GET['mooclet'], request.GET['var1'], request.GET['var2'], request.GET['var3'])
+	
+	#choose version where version_names = [version1, version2, ...]
+	#and policy_array is [probability_version1, probability_version2, ...]
+	mooclet_version = np.random.choice(version_names, p=policy)
 
 	return JsonResponse({'version': mooclet_version})
 
 def returnWeights(mooclet_id, var1, var2, var3):
 
-	policy = {}
+	policy = []
+	version_names = []
 
 	subgroup = SubGroup.objects.get(var1=var1, var2=var2, var3=var3)
 	subgroup_probability_array = SubGroupProbabilityArray.objects.get(mooclet=mooclet_id, subgroup=subgroup)
 
 	# for each probability in the probability partition
 	for version_probability in subgroup_probability_array.versionprobability_set.all():
-		# create dict entry that looks like {version_id: probability value}, e.g. {3: 0.5}
-		policy[version_probability.version.name] = version_probability.probability
+		# add the version name and probability to respective lists
+		version_names.append(version_probability.version.name)
+		policy.append(version_probability.probability)
 
-	return policy
+	return policy,version_names
