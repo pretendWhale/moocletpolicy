@@ -35,7 +35,7 @@ def returnWeights(mooclet_id, var1, var2, var3):
 	policy = []
 	version_names = []
 
-	subgroup = SubGroup.objects.get(var1=var1, var2=var2, var3=var3)
+	subgroup = SubGroup.objects.filter(var1=var1, var2=var2, var3=var3)[0]
 	subgroup_probability_array = SubGroupProbabilityArray.objects.get(mooclet=mooclet_id, subgroup=subgroup)
 
 	# for each probability in the probability partition
