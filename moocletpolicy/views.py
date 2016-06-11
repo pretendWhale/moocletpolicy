@@ -28,7 +28,7 @@ def get_mooclet_version(request):
 	#and policy_array is [probability_version1, probability_version2, ...]
 	mooclet_version = np.random.choice(version_names, p=policy)
 
-	return JsonResponse({'version': mooclet_version})
+	return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
 
 def returnWeights(mooclet_id, var1, var2, var3):
 
