@@ -13,6 +13,7 @@ class Version(models.Model):
 	# MOOClets
 	mooclet = models.ForeignKey(Mooclet)
 	name = models.CharField(max_length=100)
+	text = models.CharField(max_length=1024)
 
 	def __unicode__(self):
 		return self.name
@@ -38,10 +39,14 @@ class SubGroup(models.Model):
 		return val_str
 		#return str(self.id)
 
+
+
+
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
 	mooclet = models.ForeignKey(Mooclet)
 	subgroup = models.ForeignKey(SubGroup)
+#	policy = models.ForeignKey(Policy)
 
 	def __unicode__(self):
 		return str(self.id)
@@ -57,7 +62,27 @@ class VersionProbability(models.Model):
 		return str(self.id)
 
 
+# class Student(models.Model):
+# 	user_id = models.CharField(max_length=100)
 
+# class UserVarInt(models.Model):
+# 	student = models.ForeignKey(Student)
+# 	label = models.CharField(max_length=100) #REASON
+# 	var_value = models.IntegerField(null=True, blank=True)
+# 	descriptor = models.CharField(max_length=250)
+
+# class Record(models.Model):
+# 	version = models.ForeignKey(Version)
+# 	subgroup = models.ForeignKey(SubGroup)
+# 	mooclet = models.ForeignKey(Mooclet)
+# 	policy = models.ForeignKey(Policy)
+#	student = models.ForeignKey(Student)
+# 	reward = models.FloatField(null=True, blank=True)
+
+
+# class Policy(models.Model):
+# 	name = models.CharField(max_length=100) #e.g. "egreedy" or "sample_without_replacement"
+# 	policy_function = models.CharField(max_length=100) #the name of the actual python function we run to assign a version based on this policy
 
 
 # class CustomVariable(models.Model):

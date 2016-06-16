@@ -30,8 +30,20 @@ def get_mooclet_version(request):
 
 	return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
 
-def returnWeights(mooclet_id, var1, var2, var3):
+def get_mooclet_version_without_replacement(request):
+	"""
+	look up what conditions past users have been in
+	if any past version has 
+	"""
+	pass
 
+def get_mooclet_version_from_policy(request, policy_name):
+	#if policy_name = "egreedy"
+	#elif policy_name = "sample_without_replacement"
+	pass
+
+def returnWeights(mooclet_id, var1, var2, var3):
+	#change this to subgroup probabilites
 	policy = []
 	version_names = []
 
@@ -45,3 +57,12 @@ def returnWeights(mooclet_id, var1, var2, var3):
 		policy.append(version_probability.probability)
 
 	return policy,version_names
+
+def accept_version_request(request):
+	"""
+	create user in database and add init vars
+	"""
+	pass
+
+def policy1(student_id, mooclet_id):
+	pass
