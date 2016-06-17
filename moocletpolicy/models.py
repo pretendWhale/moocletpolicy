@@ -4,6 +4,7 @@ from django.db import models
 class Mooclet(models.Model):
 	# id
 	name = models.CharField(max_length=100)
+	#policy = models.ForeignKey(Policy)
 	def __unicode__(self):
 		return self.name
 
@@ -13,7 +14,7 @@ class Version(models.Model):
 	# MOOClets
 	mooclet = models.ForeignKey(Mooclet)
 	name = models.CharField(max_length=100)
-	text = models.CharField(max_length=1024)
+	text = models.CharField(max_length=1024, null=True, blank=True)
 
 	def __unicode__(self):
 		return self.name
@@ -62,14 +63,33 @@ class VersionProbability(models.Model):
 		return str(self.id)
 
 
-# class Student(models.Model):
-# 	user_id = models.CharField(max_length=100)
+class Policy(models.Model):
+	name = models.CharField(max_length=100) #e.g. "egreedy" or "sample_without_replacement"
+	policy_function = models.CharField(max_length=100) #the name of the actual python function we run to assign a version based on this policy
 
-# class UserVarInt(models.Model):
-# 	student = models.ForeignKey(Student)
-# 	label = models.CharField(max_length=100) #REASON
-# 	var_value = models.IntegerField(null=True, blank=True)
-# 	descriptor = models.CharField(max_length=250)
+
+class Student(models.Model):
+	user_id = models.CharField(max_length=100, primary_key=True)
+
+class UserVarNum(models.Model):
+	student = models.ForeignKey(Student)
+	label = models.CharField(max_length=100) #REASON
+	value = models.FloatField(null=True, blank=True) #TODO: does this make sense?
+	descriptor = models.CharField(max_length=250, null=True, blank=True)
+
+
+class UserVarText(models.Model):
+	student = models.ForeignKey(Student)
+	label = models.CharField(max_length=100) #REASON
+	value = models.CharField(null=True, blank=True, max_length=2000) 
+	descriptor = models.CharField(max_length=250)
+
+class UserVarMoocletVersion(models.Model):
+	student = models.ForeignKey(Student)
+	mooclet = mooclet = models.ForeignKey(Mooclet)
+	version = models.ForeignKey(Version)
+	policy = models.ForeignKey(Policy)
+
 
 # class Record(models.Model):
 # 	version = models.ForeignKey(Version)
@@ -80,9 +100,6 @@ class VersionProbability(models.Model):
 # 	reward = models.FloatField(null=True, blank=True)
 
 
-# class Policy(models.Model):
-# 	name = models.CharField(max_length=100) #e.g. "egreedy" or "sample_without_replacement"
-# 	policy_function = models.CharField(max_length=100) #the name of the actual python function we run to assign a version based on this policy
 
 
 # class CustomVariable(models.Model):
@@ -91,3 +108,5 @@ class VersionProbability(models.Model):
 # class CustomVariableValue(models.Model):
 # 	variable = model.ForeignKey(CustomVariable)
 # 	value = model.FloatField()
+
+#class Reward(models.Model):

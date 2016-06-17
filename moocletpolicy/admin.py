@@ -40,8 +40,15 @@ class VersionProbabilityAdmin (admin.ModelAdmin):
 	def get_mooclet(self, obj):
 		return obj.version.mooclet
 
+class UserVarNumInline(admin.StackedInline):
+    model = UserVarNum
 
+class UserVarTextInline(admin.StackedInline):
+    model = UserVarText
 
+class StudentAdmin (admin.ModelAdmin):
+	list_display = ['user_id']
+	inlines = [UserVarNumInline, UserVarTextInline]
 	
 
 
@@ -53,3 +60,4 @@ admin.site.register(Version, VersionAdmin)
 admin.site.register(SubGroup, SubGroupAdmin)
 admin.site.register(SubGroupProbabilityArray, SubGroupProbabilityArrayAdmin)
 admin.site.register(VersionProbability, VersionProbabilityAdmin)
+admin.site.register(Student, StudentAdmin)

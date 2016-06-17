@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.forms import formset_factory,inlineformset_factory, ModelForm
 from django.http import HttpResponse, JsonResponse
+from django.core.exceptions import *
+import json
 import numpy as np
 
 from .models import *
@@ -66,3 +68,25 @@ def accept_version_request(request):
 
 def policy1(student_id, mooclet_id):
 	pass
+
+#where vars is a JSON object
+def update_student_vars(student_id, vars):
+	student, created = Student.objects.get_or_create(user_id=student_id)
+	output_log = []
+
+	student_vars = json.loads(vars)
+	for label, value in student_vars.iteritems():
+		if type(value) is str:
+			student_var, student_var_created = UserVarText.objects.update_or_create(student=student, label=label, value=value)
+			output_log.append("success! String %s" (student_var_created))
+		elif type(value) is int or type(value) is float:
+			if type(value) is int:
+				value = float(value)
+			student_var, student_var_created = UserVarNum.objects.update_or_create(student=student, label=label, value=value)
+			output_log.append("success! Float %s" (student_var_created))
+	return output_log
+
+
+def test_update_vars(request):
+	log = update_student_vars("test1", '{"reason": 1, "moocs": 5, "exp_text": "this is good"}')
+	return HttpResponse(log)
