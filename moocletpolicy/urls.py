@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^getmoocletversion/', views.get_mooclet_version, name="get mooclet version"),
     url(r'^testupdatevars/', views.test_update_vars, name="test updating vars"),
+    url(r'^testcreateweightset/', views.test_create_weightset, name="test creating a set of weights"),
 ]

@@ -84,7 +84,7 @@ class UserVarText(models.Model):
 
 class UserVarMoocletVersion(models.Model):
 	student = models.ForeignKey(Student)
-	mooclet = mooclet = models.ForeignKey(Mooclet)
+	mooclet = models.ForeignKey(Mooclet)
 	version = models.ForeignKey(Version)
 	policy = models.ForeignKey(Policy)
 
