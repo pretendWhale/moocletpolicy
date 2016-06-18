@@ -41,8 +41,6 @@ class SubGroup(models.Model):
 		#return str(self.id)
 
 
-
-
 # [0.2, 0.3, 0.5]
 class SubGroupProbabilityArray(models.Model):
 	mooclet = models.ForeignKey(Mooclet)

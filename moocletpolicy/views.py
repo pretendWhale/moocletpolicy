@@ -90,3 +90,38 @@ def update_student_vars(student_id, vars):
 def test_update_vars(request):
 	log = update_student_vars("test1", '{"reason": 1, "moocs": 5, "exp_text": "this is good"}')
 	return HttpResponse(log)
+
+
+def create_weights(mooclet_id, reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.33,0.33,0.34]):
+	mooclet = Mooclet.objects.get(name=mooclet_id)
+	mooclet_versions = Version.objects.filter(mooclet=mooclet)
+	#create the subgroups
+	for reason in range(len(reason_subgoups)):
+		#reason, null, null
+		subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason])
+		subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup)
+		for version, weight in zip(mooclet_versions, weights):
+			version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+
+		for nummoocs in range(len(nummoocssubgroups)):
+			#null, nummooocs, null
+			subgroup = SubGroup.objects.get_or_create(var2=nummoocssubgroups[nummoocs])
+			for version, weight in zip(mooclet_versions, weights):
+				version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+			subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=nummoocssubgroups[nummoocs])
+			for version, weight in zip(mooclet_versions, weights):
+				version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+			for education in range(len(educationsubgroups)):
+				#null, null, education
+				subgroup = SubGroup.objects.get_or_create(var3=educationsubgroups[education])
+				for version, weight in zip(mooclet_versions, weights):
+					version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+				subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var3=educationsubgroups[education])
+				for version, weight in zip(mooclet_versions, weights):
+					version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+				subgroup = SubGroup.objects.get_or_create(var2=nummoocssubgroups[nummoocs], var3=educationsubgroups[education])
+				for version, weight in zip(mooclet_versions, weights):
+					version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
+				subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=nummoocssubgroups[nummoocs], var3=educationsubgroups[education])
+				for version, weight in zip(mooclet_versions, weights):
+					version_probability = VersionProbability.objects.get_or_create(version=version, subgroup_probability_array=subgroup_probability_array, probability=weight)
