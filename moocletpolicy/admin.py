@@ -46,11 +46,15 @@ class UserVarNumInline(admin.StackedInline):
 class UserVarTextInline(admin.StackedInline):
     model = UserVarText
 
+class UserVarMoocletVersionInline(admin.StackedInline):
+    model = UserVarMoocletVersion
+
 class StudentAdmin (admin.ModelAdmin):
 	list_display = ['user_id']
-	inlines = [UserVarNumInline, UserVarTextInline]
+	inlines = [UserVarNumInline, UserVarTextInline, UserVarMoocletVersionInline]
 	
-
+class UserVarMoocletVersionAdmin (admin.ModelAdmin):
+	list_display = ['student', 'mooclet', 'version', 'policy']
 
 
 
@@ -61,3 +65,4 @@ admin.site.register(SubGroup, SubGroupAdmin)
 admin.site.register(SubGroupProbabilityArray, SubGroupProbabilityArrayAdmin)
 admin.site.register(VersionProbability, VersionProbabilityAdmin)
 admin.site.register(Student, StudentAdmin)
+admin.site.register(UserVarMoocletVersion, UserVarMoocletVersionAdmin)

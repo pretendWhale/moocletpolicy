@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.core.exceptions import *
 import json
 import numpy as np
+import random
 
 from .models import *
 
@@ -37,15 +38,17 @@ def get_mooclet_version_without_replacement(request):
 	look up what conditions past users have been in
 	if any past version has 
 	"""
+	policy = Policy.objects.get_or_create(name="sample_without_replacement")
+
 	student, created = Student.objects.get_or_create(user_id=request.GET['user_id'])
 	mooclet = Mooclet.objects.get(name=request.GET['mooclet'])
 	mooclet_versions = Version.objects.filter(mooclet=mooclet).order_by('name')
-	mooclet_version = ''
-	if not created:
-		#we've logged this user in the past - check if mooclet
-		if UserVarMoocletVersion.objects.filter(student=student, mooclet=mooclet).exists():
-			#they have already been assigned to a version
-			mooclet_version = UserVarMoocletVersion.objects.get(student=student, mooclet=mooclet).version.name
+	mooclet_version_assigned = None
+	mooclet_version_assigned_name = ''
+	if (not created) and UserVarMoocletVersion.objects.filter(student=student, mooclet=mooclet).exists():
+		#we've logged this user in the past and they have a mooclet
+		#they have already been assigned to a version
+		mooclet_version_assigned_name = UserVarMoocletVersion.objects.get(student=student, mooclet=mooclet).version.name
 	else:
 		#the user is totally new, so we definitely need to assign a mooclet
 		version_assignments = {}
@@ -53,7 +56,24 @@ def get_mooclet_version_without_replacement(request):
 		for version in mooclet_versions:
 			previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version).count()
 			version_assignments[version.name] = previous_assignments
-	return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
+		highest = max(version_assignments.values())
+		versions_with_max = [k for k,v in version_assignments.items() if v == highest]
+		if len(versions_with_max) == len(mooclet_versions):
+			#all versions are equal; select randomly
+			rand_version = random.randrange(len(mooclet_versions))
+			mooclet_version_assigned = mooclet_versions[rand_version]
+			mooclet_version_assigned_name = mooclet_version_assigned.name
+		else:
+			#remove all max from the list
+			for max_version in versions_with_max:
+				del version_assignments[max_version]
+			#select from remainder
+			version_name = random.choice(version_assignments.keys())
+			mooclet_version_assigned = mooclet_versions.get(name=version_name)
+			mooclet_version_assigned_name = mooclet_version_assigned.name
+		selected = UserVarMoocletVersion.objects.create(student=student, mooclet=mooclet, version=mooclet_version_assigned, policy=policy[0])
+
+	return JsonResponse({'version': mooclet_version_assigned_name, 'wentwrong': '0'})
 	
 
 def get_mooclet_version_from_policy(request, policy_name):
@@ -109,13 +129,20 @@ def test_update_vars(request):
 	return HttpResponse(log)
 
 
-def create_weights(mooclet_id, reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.33,0.33,0.34]):
+def create_weights(mooclet_id, reason_subgroups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.33,0.33,0.34]):
 	mooclet = Mooclet.objects.get(name=mooclet_id)
 	mooclet_versions = Version.objects.filter(mooclet=mooclet).order_by('name')
 	#create the subgroups
-	for reason in range(len(reason_subgoups)):
+	#start with all null
+	subgroup = SubGroup.objects.get_or_create(var1=None, var2=None, var3=None)
+	subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
+	for version, weight in zip(mooclet_versions, weights):
+		version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
+
+	#iterate through variable values (including null)
+	for reason in range(len(reason_subgroups)):
 		#reason, null, null
-		subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=None, var3=None)
+		subgroup = SubGroup.objects.get_or_create(var1=reason_subgroups[reason], var2=None, var3=None)
 		subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 		for version, weight in zip(mooclet_versions, weights):
 			version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
@@ -126,7 +153,7 @@ def create_weights(mooclet_id, reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2
 			subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 			for version, weight in zip(mooclet_versions, weights):
 				version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
-			subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=nummoocssubgroups[nummoocs], var3=None)
+			subgroup = SubGroup.objects.get_or_create(var1=reason_subgroups[reason], var2=nummoocssubgroups[nummoocs], var3=None)
 			subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 			for version, weight in zip(mooclet_versions, weights):
 				version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
@@ -136,7 +163,7 @@ def create_weights(mooclet_id, reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2
 				subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 				for version, weight in zip(mooclet_versions, weights):
 					version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
-				subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=None, var3=educationsubgroups[education])
+				subgroup = SubGroup.objects.get_or_create(var1=reason_subgroups[reason], var2=None, var3=educationsubgroups[education])
 				subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 				for version, weight in zip(mooclet_versions, weights):
 					version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
@@ -144,10 +171,10 @@ def create_weights(mooclet_id, reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2
 				subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 				for version, weight in zip(mooclet_versions, weights):
 					version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
-				subgroup = SubGroup.objects.get_or_create(var1=reason_subgoups[reason], var2=nummoocssubgroups[nummoocs], var3=educationsubgroups[education])
+				subgroup = SubGroup.objects.get_or_create(var1=reason_subgroups[reason], var2=nummoocssubgroups[nummoocs], var3=educationsubgroups[education])
 				subgroup_probability_array = SubGroupProbabilityArray.objects.get_or_create(mooclet=mooclet, subgroup=subgroup[0])
 				for version, weight in zip(mooclet_versions, weights):
 					version_probability = VersionProbability.objects.update_or_create(version=version, subgroup_probability_array=subgroup_probability_array[0], probability=weight)
 
 def test_create_weightset(request):
-	create_weights("Mooclet1", reason_subgoups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.30,0.36,0.34])
+	create_weights("Mooclet1", reason_subgroups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.30,0.36,0.34])

@@ -63,7 +63,7 @@ class VersionProbability(models.Model):
 
 class Policy(models.Model):
 	name = models.CharField(max_length=100) #e.g. "egreedy" or "sample_without_replacement"
-	policy_function = models.CharField(max_length=100) #the name of the actual python function we run to assign a version based on this policy
+	policy_function = models.CharField(max_length=100, null=True, blank=True) #the name of the actual python function we run to assign a version based on this policy
 
 
 class Student(models.Model):
