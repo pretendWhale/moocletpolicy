@@ -41,21 +41,46 @@ def get_mooclet_version_without_replacement(request):
 	policy = Policy.objects.get_or_create(name="sample_without_replacement")
 
 	student, created = Student.objects.get_or_create(user_id=request.GET['user_id'])
+	
+	#get the user vars and update them
+	user_variables = request.GET.copy().dict()
+	#assume all vars other than user id and mooclet are user vars
+	del user_variables['user_id']
+	del user_variables['mooclet']
+	#attempt to coerce strings to floats
+	for key in user_variables:
+		try:
+			user_variables[key] = float(user_variables[key])
+		except ValueError:
+			pass
+	json_user_vars = json.dumps(user_variables)
+	update_student_vars(request.GET['user_id'], json_user_vars)
 	mooclet = Mooclet.objects.get(name=request.GET['mooclet'])
 	mooclet_versions = Version.objects.filter(mooclet=mooclet).order_by('name')
 	mooclet_version_assigned = None
 	mooclet_version_assigned_name = ''
+
 	if (not created) and UserVarMoocletVersion.objects.filter(student=student, mooclet=mooclet).exists():
 		#we've logged this user in the past and they have a mooclet
 		#they have already been assigned to a version
 		mooclet_version_assigned_name = UserVarMoocletVersion.objects.get(student=student, mooclet=mooclet).version.name
 	else:
-		#the user is totally new, so we definitely need to assign a mooclet
+		#the user is new or has not been assigned to this mooclet, so we definitely need to assign them
 		version_assignments = {}
 		#count the previous assignments
 		for version in mooclet_versions:
-			previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version).count()
+			#get all previously recorded user variables that match the current vars
+			#assumes we only care about numbers for now
+			stratum = UserVarNum.objects.filter(label__in=user_variables.keys())
+			#get only those instances whose values match the current user
+			stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
+			#print stratum.count()
+			#get the users. values('student_id') b/c it is the primary key (id) of the student model
+			stratum_users = Student.objects.filter(user_id__in=stratum.values('student_id'))
+			#print stratum_users.count()
+			previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
 			version_assignments[version.name] = previous_assignments
+		print version_assignments
 		highest = max(version_assignments.values())
 		versions_with_max = [k for k,v in version_assignments.items() if v == highest]
 		if len(versions_with_max) == len(mooclet_versions):
@@ -68,6 +93,7 @@ def get_mooclet_version_without_replacement(request):
 			for max_version in versions_with_max:
 				del version_assignments[max_version]
 			#select from remainder
+			#print version_assignments
 			version_name = random.choice(version_assignments.keys())
 			mooclet_version_assigned = mooclet_versions.get(name=version_name)
 			mooclet_version_assigned_name = mooclet_version_assigned.name
@@ -109,24 +135,20 @@ def policy1(student_id, mooclet_id):
 #where vars is a JSON object
 def update_student_vars(student_id, vars):
 	student, created = Student.objects.get_or_create(user_id=student_id)
-	output_log = []
-
+	dict_types = '' 
 	student_vars = json.loads(vars)
 	for label, value in student_vars.iteritems():
-		if type(value) is str:
+		if type(value) is str or type(value) is unicode:
 			student_var, student_var_created = UserVarText.objects.update_or_create(student=student, label=label, value=value)
-			output_log.append("success! String %s" (student_var_created))
 		elif type(value) is int or type(value) is float:
 			if type(value) is int:
 				value = float(value)
 			student_var, student_var_created = UserVarNum.objects.update_or_create(student=student, label=label, value=value)
-			output_log.append("success! Float %s" (student_var_created))
-	return output_log
 
 
 def test_update_vars(request):
-	log = update_student_vars("test1", '{"reason": 1, "moocs": 5, "exp_text": "this is good"}')
-	return HttpResponse(log)
+	update_student_vars("test1", '{"reason": 1, "moocs": 5, "exp_text": "this is good"}')
+	return HttpResponse(success)
 
 
 def create_weights(mooclet_id, reason_subgroups=[1,2,3], nummoocssubgroups=[0,1,2], educationsubgroups=[1,2,3], weights=[0.33,0.33,0.34]):

@@ -65,9 +65,14 @@ class Policy(models.Model):
 	name = models.CharField(max_length=100) #e.g. "egreedy" or "sample_without_replacement"
 	policy_function = models.CharField(max_length=100, null=True, blank=True) #the name of the actual python function we run to assign a version based on this policy
 
+	def __unicode__(self):
+		return str(self.name)
 
 class Student(models.Model):
 	user_id = models.CharField(max_length=100, primary_key=True)
+
+	def __unicode__(self):
+		return str(self.user_id)
 
 class UserVarNum(models.Model):
 	student = models.ForeignKey(Student)
@@ -87,6 +92,9 @@ class UserVarMoocletVersion(models.Model):
 	mooclet = models.ForeignKey(Mooclet)
 	version = models.ForeignKey(Version)
 	policy = models.ForeignKey(Policy)
+
+	def __unicode__(self):
+		return str(self.version)
 
 
 # class Record(models.Model):
