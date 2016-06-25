@@ -53,6 +53,17 @@ def get_mooclet_version_without_replacement(request):
 			user_variables[key] = float(user_variables[key])
 		except ValueError:
 			pass
+	if user_variables['father_ed'] == 13.0 or user_variables['father_ed'] == 17.0 :
+		user_variables['father_ed'] = user_variables['father_ed'] * -1.0
+
+	if user_variables['mother_ed'] == 13.0 or user_variables['mother_ed'] == 17.0 :
+		user_variables['mother_ed'] = user_variables['mother_ed'] * -1.0
+		
+	max_ed = max(user_variables['father_ed'], user_variables['mother_ed'])
+	user_variables['max_education'] = max_ed
+	del user_variables['father_ed']
+	del user_variables['mother_ed']
+
 	json_user_vars = json.dumps(user_variables)
 	update_student_vars(request.GET['user_id'], json_user_vars)
 	mooclet = Mooclet.objects.get(name=request.GET['mooclet'])
