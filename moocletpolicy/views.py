@@ -33,12 +33,16 @@ def get_mooclet_version(request):
 
 	return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
 
-def get_mooclet_version_without_replacement(request):
+def get_mooclet_version_without_replacement_policy(request):
 	"""
 	look up what conditions past users have been in
 	if any past version has 
 	"""
-	policy = Policy.objects.get_or_create(name="sample_without_replacement")
+	#stub for multiple policies
+	if 'policy' not in request.GET:
+		policy = Policy.objects.get_or_create(name="sample_without_replacement")
+	else:
+		policy = Policy.objects.get_or_create(name=request.GET['policy'])
 
 	student, created = Student.objects.get_or_create(user_id=request.GET['user_id'])
 	
@@ -58,17 +62,22 @@ def get_mooclet_version_without_replacement(request):
 
 	if user_variables['mother_ed'] == 13.0 or user_variables['mother_ed'] == 17.0 :
 		user_variables['mother_ed'] = user_variables['mother_ed'] * -1.0
-		
+	
+
 	max_ed = max(user_variables['father_ed'], user_variables['mother_ed'])
 	user_variables['max_education'] = max_ed
+
+
+	#store ALL user vars, but delete ones we're uninterested in from dict
+	json_user_vars = json.dumps(user_variables)
+	update_student_vars(request.GET['user_id'], json_user_vars)
 	del user_variables['father_ed']
 	del user_variables['mother_ed']
 
-	json_user_vars = json.dumps(user_variables)
-	update_student_vars(request.GET['user_id'], json_user_vars)
+	
+
+
 	mooclet = Mooclet.objects.get(name=request.GET['mooclet'])
-	mooclet_versions = Version.objects.filter(mooclet=mooclet).order_by('name')
-	mooclet_version_assigned = None
 	mooclet_version_assigned_name = ''
 
 	if (not created) and UserVarMoocletVersion.objects.filter(student=student, mooclet=mooclet).exists():
@@ -76,42 +85,56 @@ def get_mooclet_version_without_replacement(request):
 		#they have already been assigned to a version
 		mooclet_version_assigned_name = UserVarMoocletVersion.objects.get(student=student, mooclet=mooclet).version.name
 	else:
-		#the user is new or has not been assigned to this mooclet, so we definitely need to assign them
-		version_assignments = {}
-		#count the previous assignments
-		for version in mooclet_versions:
-			#get all previously recorded user variables that match the current vars
-			#assumes we only care about numbers for now
-			stratum = UserVarNum.objects.filter(label__in=user_variables.keys())
-			#get only those instances whose values match the current user
-			stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
-			#print stratum.count()
-			#get the users. values('student_id') b/c it is the primary key (id) of the student model
-			stratum_users = Student.objects.filter(user_id__in=stratum.values('student_id'))
-			#print stratum_users.count()
-			previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
-			version_assignments[version.name] = previous_assignments
-		print version_assignments
-		highest = max(version_assignments.values())
-		versions_with_max = [k for k,v in version_assignments.items() if v == highest]
-		if len(versions_with_max) == len(mooclet_versions):
-			#all versions are equal; select randomly
-			rand_version = random.randrange(len(mooclet_versions))
-			mooclet_version_assigned = mooclet_versions[rand_version]
-			mooclet_version_assigned_name = mooclet_version_assigned.name
-		else:
-			#remove all max from the list
-			for max_version in versions_with_max:
-				del version_assignments[max_version]
-			#select from remainder
-			#print version_assignments
-			version_name = random.choice(version_assignments.keys())
-			mooclet_version_assigned = mooclet_versions.get(name=version_name)
-			mooclet_version_assigned_name = mooclet_version_assigned.name
-		selected = UserVarMoocletVersion.objects.create(student=student, mooclet=mooclet, version=mooclet_version_assigned, policy=policy[0])
+		mooclet_version_assigned_name = get_version_without_replacement(student, mooclet, policy, user_variables)
+
 
 	return JsonResponse({'version': mooclet_version_assigned_name, 'wentwrong': '0'})
 	
+def get_version_without_replacement(student, mooclet, policy, user_variables={}):
+
+
+	mooclet_versions = Version.objects.filter(mooclet=mooclet).order_by('name')
+	mooclet_version_assigned = None
+	mooclet_version_assigned_name = ''
+
+
+	#the user is new or has not been assigned to this mooclet, so we definitely need to assign them
+	version_assignments = {}
+	#count the previous assignments
+	for version in mooclet_versions:
+		#get all previously recorded user variables that match the current vars
+		#assumes we only care about numbers for now
+		stratum = UserVarNum.objects.filter(label__in=user_variables.keys())
+		#get only those instances whose values match the current user
+		stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
+		#print stratum.count()
+		#get the users. values('student_id') b/c it is the primary key (id) of the student model
+		stratum_users = Student.objects.filter(user_id__in=stratum.values('student_id'))
+		#print stratum_users.count()
+		previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
+		version_assignments[version.name] = previous_assignments
+	print version_assignments
+	highest = max(version_assignments.values())
+	versions_with_max = [k for k,v in version_assignments.items() if v == highest]
+	if len(versions_with_max) == len(mooclet_versions):
+		#all versions are equal; select randomly
+		rand_version = random.randrange(len(mooclet_versions))
+		mooclet_version_assigned = mooclet_versions[rand_version]
+		mooclet_version_assigned_name = mooclet_version_assigned.name
+	else:
+		#remove all max from the list
+		for max_version in versions_with_max:
+			del version_assignments[max_version]
+		#select from remainder
+		#print version_assignments
+		version_name = random.choice(version_assignments.keys())
+		mooclet_version_assigned = mooclet_versions.get(name=version_name)
+		mooclet_version_assigned_name = mooclet_version_assigned.name
+	selected = UserVarMoocletVersion.objects.create(student=student, mooclet=mooclet, version=mooclet_version_assigned, policy=policy[0])
+
+	return mooclet_version_assigned_name
+
+	pass
 
 def get_mooclet_version_from_policy(request, policy_name):
 	#if policy_name = "egreedy"
