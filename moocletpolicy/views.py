@@ -85,11 +85,97 @@ def get_mooclet_version_without_replacement_policy(request):
 		#they have already been assigned to a version
 		mooclet_version_assigned_name = UserVarMoocletVersion.objects.get(student=student, mooclet=mooclet).version.name
 	else:
-		mooclet_version_assigned_name = get_version_without_replacement(student, mooclet, policy, user_variables)
+		mooclet_version_assigned, mooclet_version_assigned_name = get_version_without_replacement(student, mooclet, policy, user_variables)
 
 
 	return JsonResponse({'version': mooclet_version_assigned_name, 'wentwrong': '0'})
 	
+
+def get_precourse_intervention(request):
+
+
+	if 'policy' not in request.GET:
+		policy = Policy.objects.get_or_create(name="sample_without_replacement")
+	else:
+		policy = Policy.objects.get_or_create(name=request.GET['policy'])
+
+	mooclet = Mooclet.objects.get(name=request.GET['mooclet'])
+
+
+	student = Student.objects.create()
+
+	user_variables = request.GET.copy().dict()
+	#assume all vars other than user id and mooclet are user vars
+
+	del user_variables['mooclet']
+	for key in user_variables:
+		#coerce variable values to float. if a var can't be coerced, set it to None
+		try:
+			user_variables[key] = float(user_variables[key])
+		except ValueError:
+			user_variables[key] = None
+
+	#check if it = None, then assign to bucket
+	if user_variables['assess_intent']:
+		if user_variables['assess_intent'] > 2:
+			user_variables['assess_intent'] = 1.0
+		else: 
+			user_variables['assess_intent'] = 0.0
+	else:
+		user_variables['assess_intent'] = 0.0
+
+
+	if user_variables['hours']:
+		if user_variables['hours'] >= 6:
+			user_variables['hours'] = 1.0
+		else: 
+			user_variables['hours'] = 0.0
+	else:
+		user_variables['hours'] = 0.0
+
+	if user_variables['courses_completed']:
+		if user_variables['courses_completed'] >= 4:
+			user_variables['courses_completed'] = 2.0
+		elif user_variables['courses_completed'] >= 1 and user_variables['courses_completed'] <= 3:
+			user_variables['courses_completed'] = 1.0
+		else: 
+			user_variables['courses_completed'] = 0.0
+	else:
+		user_variables['courses_completed'] = 0.0
+
+	#education is reverse coded: 1 = phd, 10 = none
+	if user_variables['education']:
+		#phd, ma, professions
+		if user_variables['education'] >= 1 and user_variables['education'] <= 3:
+			user_variables['education'] = 2.0
+		#bachelors
+		elif user_variables['education'] == 4:
+			user_variables['education'] = 1.0
+		#bachelors or below
+		else: 
+			user_variables['education'] = 0.0
+	else:
+		user_variables['education'] = 0.0
+
+	json_user_vars = json.dumps(user_variables)
+	update_student_vars(student, json_user_vars)
+
+	#of the form belonging0plans0
+	mooclet_version_assigned, mooclet_version_assigned_name = get_version_without_replacement(student, mooclet, policy, user_variables)
+	mooclet_version_values = mooclet_version_assigned.moocletversionvalue_set.all()
+	belonging = mooclet_version_values.filter(name='belonging').first()
+	plan = mooclet_version_values.filter(name='plans').first()
+	assigned_versions = {
+		'belongingassigned':belonging.value,
+		'planassigned':plan.value,
+		'webservice_call_complete_server': 1,
+	}
+	return JsonResponse(assigned_versions)
+	#return JsonResponse({'version': mooclet_version_assigned.name, 'wentwrong': '0'})
+
+
+
+
 def get_version_without_replacement(student, mooclet, policy, user_variables={}):
 
 
@@ -109,7 +195,7 @@ def get_version_without_replacement(student, mooclet, policy, user_variables={})
 		stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
 		#print stratum.count()
 		#get the users. values('student_id') b/c it is the primary key (id) of the student model
-		stratum_users = Student.objects.filter(user_id__in=stratum.values('student_id'))
+		stratum_users = Student.objects.filter(pk__in=stratum.values('student_id'))
 		#print stratum_users.count()
 		previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
 		version_assignments[version.name] = previous_assignments
@@ -132,7 +218,7 @@ def get_version_without_replacement(student, mooclet, policy, user_variables={})
 		mooclet_version_assigned_name = mooclet_version_assigned.name
 	selected = UserVarMoocletVersion.objects.create(student=student, mooclet=mooclet, version=mooclet_version_assigned, policy=policy[0])
 
-	return mooclet_version_assigned_name
+	return mooclet_version_assigned, mooclet_version_assigned_name
 
 	pass
 
@@ -168,7 +254,7 @@ def policy1(student_id, mooclet_id):
 
 #where vars is a JSON object
 def update_student_vars(student_id, vars):
-	student, created = Student.objects.get_or_create(user_id=student_id)
+	student = student_id #Student.objects.get(student_id)
 	dict_types = '' 
 	student_vars = json.loads(vars)
 	for label, value in student_vars.iteritems():

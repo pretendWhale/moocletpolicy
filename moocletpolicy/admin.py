@@ -59,6 +59,9 @@ class UserVarMoocletVersionAdmin (admin.ModelAdmin):
 class UserVarTextAdmin(admin.ModelAdmin):
     list_display = ['student', 'label', 'value']
 
+class MoocletVersionValueAdmin (admin.ModelAdmin):
+	model = MoocletVersionValue
+	list_display = ['version', 'name', 'value']
 
 
 #register the Models with their Admins
@@ -70,3 +73,4 @@ admin.site.register(VersionProbability, VersionProbabilityAdmin)
 admin.site.register(Student, StudentAdmin)
 admin.site.register(UserVarMoocletVersion, UserVarMoocletVersionAdmin)
 admin.site.register(UserVarText, UserVarTextAdmin)
+admin.site.register(MoocletVersionValue, MoocletVersionValueAdmin)

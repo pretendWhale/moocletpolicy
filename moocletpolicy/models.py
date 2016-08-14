@@ -3,7 +3,7 @@ from django.db import models
 # Prompt
 class Mooclet(models.Model):
 	# id
-	name = models.CharField(max_length=100)
+	name = models.CharField(max_length=100, unique=True)
 	#policy = models.ForeignKey(Policy)
 	def __unicode__(self):
 		return self.name
@@ -18,6 +18,11 @@ class Version(models.Model):
 
 	def __unicode__(self):
 		return self.name
+#version value - e.g. name='belonging' value = 0
+class MoocletVersionValue(models.Model):
+	version = models.ForeignKey(Version)
+	name = models.CharField(max_length=100)
+	value = models.IntegerField()
 
 # null=true allows null values 
 # blank allows leaving fields blank when adding them e.g. via admin interface
@@ -69,20 +74,20 @@ class Policy(models.Model):
 		return str(self.name)
 
 class Student(models.Model):
-	user_id = models.CharField(max_length=100, primary_key=True)
+	user_id = models.CharField(max_length=100, null=True)
 
 	def __unicode__(self):
 		return str(self.user_id)
 
 class UserVarNum(models.Model):
-	student = models.ForeignKey(Student)
+	student = models.ForeignKey(Student, null=True, blank=True)
 	label = models.CharField(max_length=100) #REASON
 	value = models.FloatField(null=True, blank=True) #TODO: does this make sense?
 	descriptor = models.CharField(max_length=250, null=True, blank=True)
 
 
 class UserVarText(models.Model):
-	student = models.ForeignKey(Student)
+	student = models.ForeignKey(Student, null=True, blank=True)
 	label = models.CharField(max_length=100) #REASON
 	value = models.CharField(null=True, blank=True, max_length=2000) 
 	descriptor = models.CharField(max_length=250)
