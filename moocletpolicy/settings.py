@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import dj_database_url
+from .secure import SECURE_SETTINGS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,7 +22,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "#j_uy3&m16o*b*-hgyxt_97@rhmh6s98#6uhf8d1j2#l!s0l+g"
+SECRET_KEY = SECURE_SETTINGS.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,10 +84,15 @@ WSGI_APPLICATION = 'moocletpolicy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': SECURE_SETTINGS.get('db_name'),
+        'USER': SECURE_SETTINGS.get('db_user'),
+        'PASSWORD': SECURE_SETTINGS.get('db_pass'),
+        'HOST': SECURE_SETTINGS.get('db_host'),
+        'PORT': SECURE_SETTINGS.get('db_port'),
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
