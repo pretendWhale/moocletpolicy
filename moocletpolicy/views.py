@@ -116,13 +116,13 @@ def get_precourse_intervention(request):
 			user_variables[key] = None
 
 	#check if it = None, then assign to bucket
-	if user_variables['assess_intent']:
-		if user_variables['assess_intent'] > 2:
-			user_variables['assess_intent'] = 1.0
+	if user_variables['intent_assess']:
+		if user_variables['intent_assess'] > 2:
+			user_variables['intent_assess'] = 1.0
 		else: 
-			user_variables['assess_intent'] = 0.0
+			user_variables['intent_assess'] = 0.0
 	else:
-		user_variables['assess_intent'] = 0.0
+		user_variables['intent_assess'] = 0.0
 
 
 	if user_variables['hours']:
