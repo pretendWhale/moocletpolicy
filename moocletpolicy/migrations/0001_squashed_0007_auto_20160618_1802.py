@@ -8,7 +8,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    replaces = [(b'moocletpolicy', '0001_initial'), (b'moocletpolicy', '0002_auto_20160607_1242'), (b'moocletpolicy', '0003_auto_20160607_2037'), (b'moocletpolicy', '0004_auto_20160607_2040'), (b'moocletpolicy', '0005_auto_20160617_1314'), (b'moocletpolicy', '0006_auto_20160617_1330'), (b'moocletpolicy', '0007_auto_20160618_1802')]
+    #replaces = [(b'moocletpolicy', '0001_initial'), (b'moocletpolicy', '0002_auto_20160607_1242'), (b'moocletpolicy', '0003_auto_20160607_2037'), (b'moocletpolicy', '0004_auto_20160607_2040'), (b'moocletpolicy', '0005_auto_20160617_1314'), (b'moocletpolicy', '0006_auto_20160617_1330'), (b'moocletpolicy', '0007_auto_20160618_1802')]
 
     initial = True
 
