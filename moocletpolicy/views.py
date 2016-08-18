@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.forms import formset_factory,inlineformset_factory, ModelForm
 from django.http import HttpResponse, JsonResponse
+from django.db.models.query_utils import Q
 from django.core.exceptions import *
 import json
 import numpy as np
@@ -183,20 +184,36 @@ def get_version_without_replacement(student, mooclet, policy, user_variables={})
 	mooclet_version_assigned = None
 	mooclet_version_assigned_name = ''
 
+	students = Student.objects.all()#.prefetch_related('uservarnums')
 
+	for key, value in user_variables.iteritems():
+		students = students.all().filter(Q(uservarnum__label=key, uservarnum__value=value))
+	print ' num users is = ' + str(stratum_users.count())
 	#the user is new or has not been assigned to this mooclet, so we definitely need to assign them
 	version_assignments = {}
 	#count the previous assignments
 	for version in mooclet_versions:
 		#get all previously recorded user variables that match the current vars
 		#assumes we only care about numbers for now
-		stratum = UserVarNum.objects.filter(label__in=user_variables.keys())
 		#get only those instances whose values match the current user
-		stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
-		#print stratum.count()
+		
+		#query = Q()
+
+		#stratum = UserVarNum.objects.filter(query)
+		#stratum_users = Student.objects.all().filter(query)
+		#print stratum.query
+		# stratum = UserVarNum.objects.filter(
+		# 									Q(label='intent_assess', value=user_variables['intent_assess']) |
+		# 									Q(label='hours', value=user_variables['hours']) |
+		# 									Q(label='courses_completed', value=user_variables['courses_completed']) |
+		# 									Q(label='education', value=user_variables['education'])
+		# 									)
+		#stratum  = stratum.filter(value__in=[val for val in user_variables.values() if type(val) is float])
+		#print 'stratum size = ' + str(stratum.count())
 		#get the users. values('student_id') b/c it is the primary key (id) of the student model
-		stratum_users = Student.objects.filter(pk__in=stratum.values('student_id'))
-		#print stratum_users.count()
+		stratum_users = students
+		#stratum_users = Student.objects.filter(pk__in=stratum.values('student_id'), )
+		
 		previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
 		version_assignments[version.name] = previous_assignments
 	print version_assignments
