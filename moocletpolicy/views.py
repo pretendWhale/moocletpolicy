@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models.query_utils import Q
 from django.core.exceptions import *
 import json
-import numpy as np
+#import numpy as np
 import random
 
 from .models import *
@@ -30,9 +30,12 @@ def get_mooclet_version(request):
 	
 	#choose version where version_names = [version1, version2, ...]
 	#and policy_array is [probability_version1, probability_version2, ...]
-	mooclet_version = np.random.choice(version_names, p=policy)
+	# random_num = random.random()
+	# for weight, version in zip(policy, version_names):
+	# 	if random_ 
+	# mooclet_version = np.random.choice(version_names, p=policy)
 
-	return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
+	# return JsonResponse({'version': mooclet_version, 'wentwrong': '0'})
 
 def get_mooclet_version_without_replacement_policy(request):
 	"""
@@ -94,7 +97,7 @@ def get_mooclet_version_without_replacement_policy(request):
 
 def get_precourse_intervention(request):
 
-
+	#return JsonResponse({'webservice_call_complete_server': 7,})
 	if 'policy' not in request.GET:
 		policy = Policy.objects.get_or_create(name="sample_without_replacement")
 	else:
@@ -169,7 +172,7 @@ def get_precourse_intervention(request):
 	assigned_versions = {
 		'belongingassigned':belonging.value,
 		'planassigned':plan.value,
-		'webservice_call_complete_server': 1,
+		'webservice_call_complete_server': 2,
 	}
 	return JsonResponse(assigned_versions)
 	#return JsonResponse({'version': mooclet_version_assigned.name, 'wentwrong': '0'})
@@ -188,7 +191,8 @@ def get_version_without_replacement(student, mooclet, policy, user_variables={})
 
 	for key, value in user_variables.iteritems():
 		students = students.all().filter(Q(uservarnum__label=key, uservarnum__value=value))
-	print ' num users is = ' + str(stratum_users.count())
+	#print user_variables
+	#print ' num users is = ' + str(students.count())
 	#the user is new or has not been assigned to this mooclet, so we definitely need to assign them
 	version_assignments = {}
 	#count the previous assignments
@@ -216,7 +220,7 @@ def get_version_without_replacement(student, mooclet, policy, user_variables={})
 		
 		previous_assignments = UserVarMoocletVersion.objects.filter(mooclet=mooclet, version=version, student__in=stratum_users).count()
 		version_assignments[version.name] = previous_assignments
-	print version_assignments
+	#print version_assignments
 	highest = max(version_assignments.values())
 	versions_with_max = [k for k,v in version_assignments.items() if v == highest]
 	if len(versions_with_max) == len(mooclet_versions):
